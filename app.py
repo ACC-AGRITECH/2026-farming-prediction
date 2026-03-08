@@ -4,17 +4,29 @@ import numpy as np
 from sklearn.linear_model import LinearRegression
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
+import os
+import urllib.request
 
-# 한글 폰트 설정 (윈도우용 맑은 고딕)
-plt.rc('font', family='Malgun Gothic')
+# ---------------------------------------------------------
+# ★ 핵심: 클라우드 서버용 한글 폰트(나눔고딕) 자동 다운로드 및 설정
+# ---------------------------------------------------------
+font_path = "NanumGothic.ttf"
+# 서버에 폰트 파일이 없으면 깃허브에서 다운로드합니다.
+if not os.path.exists(font_path):
+    urllib.request.urlretrieve("https://github.com/google/fonts/raw/main/ofl/nanumgothic/NanumGothic-Regular.ttf", font_path)
+
+# 다운받은 폰트를 그래프에 적용합니다.
+fm.fontManager.addfont(font_path)
+plt.rc('font', family='NanumGothic')
+plt.rcParams['axes.unicode_minus'] = False # 마이너스 기호 깨짐 방지
 
 # ---------------------------------------------------------
 # 1. 2020~2025 데이터 세팅 (2025년은 농식품부 최신 실태조사 기반 추정치)
 # ---------------------------------------------------------
 data = {
     '연도': [2020, 2021, 2022, 2023, 2024, 2025],
-    '귀농인구(명)': [12489, 14461, 12660, 10307, 10710, 10200], # 2025: 영농 어려움으로 소폭 감소 추정
-    '귀촌인구(명)': [477122, 515434, 421106, 400600, 422789, 425000] # 2025: 청년층 유입 및 70% 만족도 기반 반등세 유지 추정
+    '귀농인구(명)': [12489, 14461, 12660, 10307, 10710, 10200], 
+    '귀촌인구(명)': [477122, 515434, 421106, 400600, 422789, 425000] 
 }
 df = pd.DataFrame(data)
 
@@ -72,21 +84,21 @@ st.success("""
 
 st.divider()
 
-# 3. 그래프 시각화
+# 3. 그래프 시각화 (한글 깨짐 해결 및 범례/제목 수정)
 st.header("📈 연도별 추이 시각화 및 2026 예측")
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
 
 # 귀농 그래프
-ax1.plot(df['연도'], df['귀농인구(명)'], marker='o', color='green', label='학습 데이터 (2020-2025)')
-ax1.plot([2025, 2026], [df['귀농인구(명)'].iloc[-1], pred_farming_2026], marker='o', linestyle='--', color='red', label='2026 예측')
-ax1.set_title("귀농 인구 추이 (명)")
+ax1.plot(df['연도'], df['귀농인구(명)'], marker='o', color='green', label='기존 추세선')
+ax1.plot([2025, 2026], [df['귀농인구(명)'].iloc[-1], pred_farming_2026], marker='o', linestyle='--', color='red', label='2026 예측선')
+ax1.set_title("귀농인구수 추이", fontsize=14, fontweight='bold')
 ax1.set_xticks([2020, 2021, 2022, 2023, 2024, 2025, 2026])
 ax1.legend()
 
 # 귀촌 그래프
-ax2.plot(df['연도'], df['귀촌인구(명)'], marker='o', color='blue', label='학습 데이터 (2020-2025)')
-ax2.plot([2025, 2026], [df['귀촌인구(명)'].iloc[-1], pred_rural_2026], marker='o', linestyle='--', color='red', label='2026 예측')
-ax2.set_title("귀촌 인구 추이 (명)")
+ax2.plot(df['연도'], df['귀촌인구(명)'], marker='o', color='blue', label='기존 추세선')
+ax2.plot([2025, 2026], [df['귀촌인구(명)'].iloc[-1], pred_rural_2026], marker='o', linestyle='--', color='red', label='2026 예측선')
+ax2.set_title("귀촌인구수 추이", fontsize=14, fontweight='bold')
 ax2.set_xticks([2020, 2021, 2022, 2023, 2024, 2025, 2026])
 ax2.legend()
 
